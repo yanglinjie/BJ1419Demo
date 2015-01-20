@@ -6,12 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.qianfeng.bj1419demo.R;
 
 import java.util.List;
-
 
 /**
  * @Package com.qianfeng.bj1419demo.adapter
@@ -58,16 +58,23 @@ public class ShowImageAdapter extends BaseAdapter {
             vh = (ViewHolder) convertView.getTag();
         }
         vh.imgIv.setImageBitmap(bitmapList.get(position));
+        int flag = (int) vh.cb.getTag();
+        if (flag== 1){
+           vh.cb.setChecked(true);
+        }else {
+            vh.cb.setChecked(false);
+        }
         return convertView;
     }
 
 
-    private static class ViewHolder {
-        ImageView imgIv;
-
+    public static class ViewHolder {
+        public ImageView imgIv;
+        public CheckBox cb;
 
         private ViewHolder(View view) {
             imgIv = (ImageView) view.findViewById(R.id.item_update_img);
+            cb = (CheckBox) view.findViewById(R.id.item_update_cb);
         }
     }
 
