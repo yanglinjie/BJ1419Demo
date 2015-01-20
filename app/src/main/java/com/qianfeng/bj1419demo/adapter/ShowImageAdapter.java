@@ -1,7 +1,6 @@
 package com.qianfeng.bj1419demo.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.qianfeng.bj1419demo.R;
+import com.qianfeng.bj1419demo.bean.UpdateImage;
 
 import java.util.List;
 
@@ -22,15 +22,17 @@ import java.util.List;
  * @日 期:
  */
 public class ShowImageAdapter extends BaseAdapter {
-    private List<Bitmap> bitmapList;
+    private List<UpdateImage> bitmapList;
     private Context context;
     private LayoutInflater inflater;
 
-    public ShowImageAdapter(List<Bitmap> bitmapList, Context context) {
+    public ShowImageAdapter(List<UpdateImage> bitmapList, Context context) {
         this.bitmapList = bitmapList;
         this.context = context;
         this.inflater = LayoutInflater.from(context);
     }
+
+
 
     @Override
     public int getCount() {
@@ -57,13 +59,12 @@ public class ShowImageAdapter extends BaseAdapter {
         } else {
             vh = (ViewHolder) convertView.getTag();
         }
-        vh.imgIv.setImageBitmap(bitmapList.get(position));
-        int flag = (int) vh.cb.getTag();
-        if (flag== 1){
-           vh.cb.setChecked(true);
-        }else {
+        if (bitmapList.get(position).getIsCheck()) {
+            vh.cb.setChecked(true);
+        } else {
             vh.cb.setChecked(false);
         }
+        vh.imgIv.setImageBitmap(bitmapList.get(position).getBitmap());
         return convertView;
     }
 

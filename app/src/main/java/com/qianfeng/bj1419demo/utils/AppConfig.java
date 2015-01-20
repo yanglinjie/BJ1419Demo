@@ -20,4 +20,6 @@ public class AppConfig {
 
 
     public static final String IMAGE_CACHE = "image";
+
+    public static final String COMPRESS_IMAGE_CACHE = "compressImage";
 }

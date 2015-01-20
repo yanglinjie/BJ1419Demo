@@ -1,5 +1,6 @@
 package com.qianfeng.bj1419demo.utils;
 
+import android.graphics.Bitmap;
 import android.os.Environment;
 
 import java.io.File;
@@ -72,7 +73,33 @@ public class FileUtils {
                 e.printStackTrace();
             }
         }
-        return  imageFile;
+        return imageFile;
+    }
+
+    /**
+     * 获得压缩的图片文件
+     *
+     * @param bitmap
+     * @return
+     */
+    public static File getCompressImageFile(Bitmap bitmap) {
+        File imageCompressCache = new File(getRootCache() + File.separator + AppConfig.COMPRESS_IMAGE_CACHE);
+        if (!imageCompressCache.exists()) {
+            imageCompressCache.mkdirs();
+        }
+        String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".png";
+        String compressFilePath = imageCompressCache.getAbsoluteFile() + File.separator + fileName;
+        File compressFile = new File(compressFilePath);
+        if (!compressFile.exists()) {
+            try {
+                compressFile.createNewFile();
+            } catch (Exception e) {
+
+            }
+        }
+
+        return ImageUtils.compressBmpToFile(bitmap, compressFile);
+
     }
 
 

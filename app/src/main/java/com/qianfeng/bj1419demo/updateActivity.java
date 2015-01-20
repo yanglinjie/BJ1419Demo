@@ -4,35 +4,44 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.RequestParams;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.qianfeng.bj1419demo.adapter.ShowImageAdapter;
+import com.qianfeng.bj1419demo.bean.UpdateImage;
 import com.qianfeng.bj1419demo.utils.FileUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.net.MulticastSocket;
 import java.util.ArrayList;
 
 /**
  * 初始化ui
+ * 图片的二次采样
  */
-public class updateActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
+public class updateActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, View.OnClickListener {
+    private static final String updateUrl = "http://10.0.155.42:8080/app/uplaodFile?method=upload";
+    private Button updateBtn;
     private GridView gridView;
     private ShowImageAdapter adapter;
-    private ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+    private ArrayList<UpdateImage> bitmaps = new ArrayList<UpdateImage>();
+
+    private ProgressBar progressBar;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -41,11 +50,23 @@ public class updateActivity extends ActionBarActivity implements AdapterView.OnI
         }
     };
 
+    /**
+     * 数据源
+     * 文件
+     *
+     * @param savedInstanceState
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update);
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        View view = getLayoutInflater().inflate(R.layout.titlebar_layout, null);
+        updateBtn = (Button) view.findViewById(R.id.titlebar_update_btn);
+        updateBtn.setOnClickListener(this);
+        getSupportActionBar().setCustomView(view, new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
         initView();
         initData();
     }
@@ -73,19 +94,44 @@ public class updateActivity extends ActionBarActivity implements AdapterView.OnI
          */
         HttpUtils httpUtils = new HttpUtils();
         RequestParams params = new RequestParams();
-        params.addBodyParameter("key", "file");
-
-        httpUtils.send(HttpRequest.HttpMethod.POST, "", params, new RequestCallBack<String>() {
-            @Override
-            public void onSuccess(ResponseInfo<String> objectResponseInfo) {
-
+        if (bitmaps != null && !bitmaps.isEmpty()) {
+            for (int i = 0; i < bitmaps.size(); i++) {
+                boolean isCheck = bitmaps.get(i).getIsCheck();
+                if (isCheck) {
+                    File compressFile = FileUtils.getCompressImageFile(bitmaps.get(i).getBitmap());
+                    params.addBodyParameter("" + i, compressFile);
+                }
             }
 
-            @Override
-            public void onFailure(HttpException e, String s) {
+            HttpHandler<String> send = httpUtils.send(HttpRequest.HttpMethod.POST, updateUrl, params, new RequestCallBack<String>() {
+                @Override
+                public void onStart() {
+                    super.onStart();
+                    progressBar = new ProgressBar(updateActivity.this);
+                    progressBar.setVisibility(View.VISIBLE);
+                }
 
-            }
-        });
+                @Override
+                public void onLoading(long total, long current, boolean isUploading) {
+                    super.onLoading(total, current, isUploading);
+                    if (isUploading) {
+                        progressBar.setMax((int) total);
+                    }
+                    progressBar.setProgress((int) current);
+                }
+
+                @Override
+                public void onSuccess(ResponseInfo<String> objectResponseInfo) {
+                    progressBar.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onFailure(HttpException e, String s) {
+
+                }
+            });
+        }
+
 
     }
 
@@ -109,10 +155,11 @@ public class updateActivity extends ActionBarActivity implements AdapterView.OnI
                 File[] imageFiles = imageCache.listFiles();
                 if (imageFiles != null && imageFiles.length > 0) {
                     for (File imageFile : imageFiles) {
-                        if (imageFile.isFile() && imageFile.getName().endsWith(".png")) {
+                        if (imageFile.isFile()) {
                             Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
                             if (bitmap != null && bitmap.getByteCount() > 0) {
-                                bitmaps.add(bitmap);
+                                UpdateImage updateImage = new UpdateImage(bitmap, imageFile, false);
+                                bitmaps.add(updateImage);
                             }
                         }
                     }
@@ -136,11 +183,17 @@ public class updateActivity extends ActionBarActivity implements AdapterView.OnI
         //两次点击取消
         ShowImageAdapter.ViewHolder vh = (ShowImageAdapter.ViewHolder) view.getTag();
         if (vh.cb.isChecked()) {
-            vh.cb.setTag(0);
             vh.cb.setChecked(false);
+            bitmaps.get(position).setIsCheck(false);
         } else {
             vh.cb.setChecked(true);
-            vh.cb.setTag(1);
+            bitmaps.get(position).setIsCheck(true);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        updateImages();
+
     }
 }

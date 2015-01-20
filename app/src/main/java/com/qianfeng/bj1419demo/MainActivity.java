@@ -18,26 +18,11 @@ import com.qianfeng.bj1419demo.utils.FileUtils;
 import java.io.File;
 
 /**
- * 1.一个Touch由 一个Action_Down 多个Action_move 一个Acion_up 组成
- * 事件分发与消费的三个重要方法
- * 1.分发 View ViewGroup Activity
- * 2.拦截 ViewGroup
- * 3.消费 View activity
- * 事件分发 以隧道形式,从上到下分发
- * 事件消费 一冒泡形式,从下往上处理
- * ShareSdk  官网注册,获得 Appkey
- * 导入jar
- * 清单文件注册,权限
- * ShareSdk.xml修改相关的信息--要去相关的开放平台注册
- * 写代码
- * OAUth2.0认证
- * 第三方登陆
- * 要数据不要功能
- * 自己的服务器有数据库的时候
- * 要功能不要数据 直接保存在手机本地
  * 重要知识点.1.调用系统相机获取图片
  * 2.调用系统相机指定文件
- * 文件操作 联网 -数据库
+ * 文件操作 联网 -数据库'
+ *
+ *
  */
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     private Button photoBtn, photoBtn1, updateBtn;
@@ -55,7 +40,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         photoBtn.setOnClickListener(this);
         photoBtn1.setOnClickListener(this);
         updateBtn.setOnClickListener(this);
-
     }
 
     @Override
